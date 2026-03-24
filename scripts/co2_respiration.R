@@ -66,9 +66,9 @@ ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux
         axis.title.x = element_text(size = 13, margin = margin(t = 12)),
         axis.title.y = element_text(size = 13, margin = margin(r = 12))) +
   annotate("text",
-           x = 0.025,
+           x = 0.023,
            y = 0.8e7,
-           label = "Treatment: p < 0.001, Biomass: p < 0.01",
+           label = "Treatment: p < 0.001, Root biomass: p < 0.01",
            hjust = 0)
 
 
