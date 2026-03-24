@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+# <<<<<<< HEAD
 library(tidyverse)
 library(ggplot2)
 library(dunn.test)
 library(dplyr)
 
-root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
+root_data <- read_csv(file = "data_raw/branch_root_data.csv") %>%
   mutate(treatment = factor(treatment,
                             levels = c("control", "heatwave", "extended"),
                             labels = c("Control", "Heat wave", "Extended season")))
