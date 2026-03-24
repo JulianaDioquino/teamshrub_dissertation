@@ -3,26 +3,26 @@ library(ggplot2)
 library(dunn.test)
 library(dplyr)
 
-root_data <- read_csv(file = "data_raw/size_branch_root_data.csv") %>%
+root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
   mutate(treatment = factor(treatment,
                             levels = c("control", "heatwave", "extended"),
                             labels = c("Control", "Heat wave", "Extended season")))
 
-str(root_data)
-root_data$thin_white_branched <- as.numeric(root_data$thin_white_branched)
-root_data$thin_white_unbranched <- as.numeric(root_data$thin_white_unbranched)
-root_data$thick_white_unbranched <- as.numeric(root_data$thin_white_unbranched)
-root_data$thin_beige_branched <- as.numeric(root_data$thin_beige_branched)
-root_data$thin_beige_unbranched <- as.numeric(root_data$thin_beige_unbranched)
-root_data$thick_beige_unbranched <- as.numeric(root_data$thick_beige_unbranched)
-root_data$thin_brown_branched <- as.numeric(root_data$thin_brown_branched )
-root_data$thin_brown_unbranched <- as.numeric(root_data$thin_brown_unbranched )
-root_data$thick_brown_unbranched <- as.numeric(root_data$thick_brown_unbranched )
-root_data$thin_black_branched  <- as.numeric(root_data$thin_black_branched)
-root_data$thin_black_unbranched  <- as.numeric(root_data$thin_black_unbranched)
-root_data$thick_black_unbranched  <- as.numeric(root_data$thick_black_unbranched)
-root_data$shrub_ratio <- as.numeric(root_data$shrub_ratio)
-root_data$graminoid_ratio <- as.numeric(root_data$graminoid_ratio)
+    str(root_data)
+    root_data$thin_white_branched <- as.numeric(root_data$thin_white_branched)
+    root_data$thin_white_unbranched <- as.numeric(root_data$thin_white_unbranched)
+    root_data$thick_white_unbranched <- as.numeric(root_data$thin_white_unbranched)
+    root_data$thin_beige_branched <- as.numeric(root_data$thin_beige_branched)
+    root_data$thin_beige_unbranched <- as.numeric(root_data$thin_beige_unbranched)
+    root_data$thick_beige_unbranched <- as.numeric(root_data$thick_beige_unbranched)
+    root_data$thin_brown_branched <- as.numeric(root_data$thin_brown_branched )
+    root_data$thin_brown_unbranched <- as.numeric(root_data$thin_brown_unbranched )
+    root_data$thick_brown_unbranched <- as.numeric(root_data$thick_brown_unbranched )
+    root_data$thin_black_branched  <- as.numeric(root_data$thin_black_branched)
+    root_data$thin_black_unbranched  <- as.numeric(root_data$thin_black_unbranched)
+    root_data$thick_black_unbranched  <- as.numeric(root_data$thick_black_unbranched)
+    root_data$shrub_ratio <- as.numeric(root_data$shrub_ratio)
+    root_data$graminoid_ratio <- as.numeric(root_data$graminoid_ratio)
 
 ratio_data <- root_data %>%
   select(plant_id, treatment, shrub_ratio, graminoid_ratio, co2_flux_avg) %>%
