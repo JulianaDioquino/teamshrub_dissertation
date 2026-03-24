@@ -1,0 +1,56 @@
+library(tidyverse)
+library(ggplot2)
+library(dunn.test)
+library(dplyr)
+
+root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
+  mutate(treatment = factor(treatment,
+                            levels = c("control", "heatwave", "extended"),
+                            labels = c("Control", "Heat wave", "Extended season")))
+    str(root_data)
+    root_data$thin_white_branched <- as.numeric(root_data$thin_white_branched)
+    root_data$thin_white_unbranched <- as.numeric(root_data$thin_white_unbranched)
+    root_data$thick_white_unbranched <- as.numeric(root_data$thick_white_unbranched)
+    root_data$thin_beige_branched <- as.numeric(root_data$thin_beige_branched)
+    root_data$thin_beige_unbranched <- as.numeric(root_data$thin_beige_unbranched)
+    root_data$thick_beige_unbranched <- as.numeric(root_data$thick_beige_unbranched)
+    root_data$thin_brown_branched <- as.numeric(root_data$thin_brown_branched )
+    root_data$thin_brown_unbranched <- as.numeric(root_data$thin_brown_unbranched )
+    root_data$thick_brown_unbranched <- as.numeric(root_data$thick_brown_unbranched )
+    root_data$thin_black_branched  <- as.numeric(root_data$thin_black_branched)
+    root_data$thin_black_unbranched  <- as.numeric(root_data$thin_black_unbranched)
+    root_data$thick_black_unbranched  <- as.numeric(root_data$thick_black_unbranched)
+    
+root_morphology <- root_data %>%
+  pivot_longer(cols = shrub_biomass:graminoid_biomass,
+               names_to = "functional_type_biomass",
+               values_to = "pft_biomass") %>%
+  filter(pft_biomass != "NA")
+
+
+co2_flux <- read_csv(file = "data_raw/shifted_co2_data.csv") 
+
+
+co2_flux_shifted <- co2_flux %>%
+  mutate(measurement.week = ifelse(Treatment == "extended",
+                                   measurement.week - 3,
+                                   measurement.week),
+         Treatment = factor(Treatment,
+                            levels = c("Control", "Heatwave", "Extended"),
+                            labels = c("Control", "Heat wave", "Extended season")))
+
+# calculated co2 flux for each plant
+avg_season_flux <- co2_flux_shifted %>%
+  group_by(plant_id, Treatment) %>%
+  summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
+
+  co2_extended_darkness <- avg_season_flux %>%
+    filter(plant_id %in% c(1, 8, 6))
+  
+  co2_extended_notdarkness <- avg_season_flux %>%
+    filter(plant_id %in% c(7, 10, 16, 18))
+
+  plant_avg_flux <- co2_flux_shifted %>%
+    group_by(plant_id, Treatment) %>%
+    summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
+  
