@@ -25,7 +25,7 @@ root_morphology <- root_data %>%
   pivot_longer(cols = shrub_biomass:graminoid_biomass,
                names_to = "functional_type_biomass",
                values_to = "pft_biomass") %>%
-  filter(!is.na(pft_biomass))
+  filter(pft_biomass != "NA")
 
 
 # root biomass ~ functional type by treatment graph
@@ -55,7 +55,7 @@ ggplot(data = root_morphology, aes(x = treatment, y = pft_biomass, fill = treatm
         panel.border = element_rect(color = "black", fill = NA, size = 1))
 
 
-# root biomass ~ functional type by treatment statistical tests
+# root biomass ~ functional type by treatment analysis
 root_morphology %>%
   group_by(functional_type_biomass) %>%
   summarise(p_value = kruskal.test(pft_biomass ~ treatment)$p.value)

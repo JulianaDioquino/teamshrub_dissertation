@@ -59,6 +59,8 @@ ggplot(data = ratio_data, aes(x = treatment, y = ratio, fill = treatment)) +
         panel.spacing = unit(1, "lines"),
         panel.border = element_rect(color = "black", fill = NA, size = 1))
 
+
+# ratio biomass ~ functional type by treatment analysis
 ratio_data %>%
   group_by(functional_type) %>%
   summarise(p_value = kruskal.test(ratio ~ treatment)$p.value) 
