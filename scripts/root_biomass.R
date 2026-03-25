@@ -94,7 +94,8 @@ dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonf
       scale_color_manual(values = c("Control" = "#6c6563",
                                     "Heat wave" = "#b56d5e",
                                     "Extended season" = "#bbbc81"))
-  # setting priors 
+    
+  # setting priors for graminoid data
     prior_root_biomass <- c(set_prior("normal(-0.03,0.05)" , class = "Intercept"),
                           set_prior("normal(0, 0.02)", class = "b", coef = "treatmentHeatwave"),
                           set_prior("normal(0, 0.02)", class = "b", coef = "treatmentExtendedseason"),
@@ -103,8 +104,8 @@ dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonf
     hist(graminoid$pft_biomass)
     hist(shrub$pft_biomass)
       
-  # fit models to data
-    bayesian_model <- brm(pft_biomass | trunc(lb = 0) ~ treatment, 
+  # fit models to graminoid data
+    bayesian_model_gram <- brm(pft_biomass | trunc(lb = 0) ~ treatment, 
                           data = graminoid,
                           iter = 5000,
                           warmup = 1000,
@@ -114,4 +115,32 @@ dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonf
                           family = gaussian(),
                           threads = threading(3),
                           init = 0)
+    plot(bayesian_model_gram)    
+    pp_check(bayesian_model_gram)   
+    
+  # setting priors for graminoid data
+    prior_root_biomass <- c(set_prior("normal(-0.05,0.1)" , class = "Intercept"),
+                          set_prior("normal(0, 0.04)", class = "b", coef = "treatmentHeatwave"),
+                          set_prior("normal(0, 0.07)", class = "b", coef = "treatmentExtendedseason"),
+                          set_prior("normal(0.02,0.3)", class = "sigma"),
+                          set_prior("normal(5,3)", class = "alpha"))
+    
+    hist(graminoid$pft_biomass)
+    hist(shrub$pft_biomass)
+    
+  # fit models to shrub data
+    bayesian_model_shrub <- brm(pft_biomass | trunc(lb = 0) ~ treatment, 
+                               data = shrub,
+                               iter = 5000,
+                               warmup = 1000,
+                               cores = 3,
+                               chains = 3,
+                               prior = prior_root_biomass,
+                               family = gaussian(),
+                               threads = threading(3),
+                               init = 0)
+    plot(bayesian_model_shrub)    
+    pp_check(bayesian_model_shrub) 
+    
+    summary(bayesian_model_shrub,prob = 0.9)
     
