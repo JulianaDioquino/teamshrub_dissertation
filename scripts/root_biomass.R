@@ -3,8 +3,17 @@ library(ggplot2)
 library(dunn.test)
 library(dplyr)
 library(data.table)
-install.packages("brms")
 library(brms)
+library(ggridges)
+library(shinystan)
+library(bayesplot)
+library(tidybayes)
+library(ggmcmc)
+
+R.version.string
+Sys.setenv(PATH = paste0("C:\\rtools43\\usr\\bin;", Sys.getenv("C:\rtools43")))
+options(buildtools.check = function(action) TRUE )
+
 
 root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
   mutate(treatment = factor(treatment,
