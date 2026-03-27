@@ -54,3 +54,4 @@ avg_season_flux <- co2_flux_shifted %>%
     group_by(plant_id, Treatment) %>%
     summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
   
+  

@@ -76,3 +76,21 @@ ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux
 flux_root_combine_anova <- lm(total_co2_flux ~ treatment*total_root_biomass, data = flux_root_combine)
 anova(flux_root_combine_anova)
 plot(flux_root_combine_anova)
+summary(flux_root_combine_anova)
+
+library(brms)
+
+bayesian_model_respiration <- brm( total_co2_flux ~ treatment*total_root_biomass , # |  trunc(lb=0)  # model formula
+                       data = flux_root_combine, # dataset
+                       iter = 5000, # number of smapling iteration
+                       warmup = 1000, # discarded iterations at the start
+                       cores = 3, # a core compute a chain, 3 time faster
+                       chains = 3, # number of independant models that we want to converge
+                       #prior = prior_root_biomass ,
+                      # control = list(adapt_delta = 0.99),
+                       family = gaussian(), # distribution
+                       #threads = threading(3), # even faster
+                       init = 0) # more stable sampling
+
+
+pp_check(bayesian_model_respiration)

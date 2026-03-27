@@ -96,7 +96,7 @@ dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonf
                                     "Extended season" = "#bbbc81"))
     
   # setting priors for graminoid data
-    prior_root_biomass <- c(set_prior("normal(-0.03,0.05)" , class = "Intercept"),
+    prior_root_biomass <- c(set_prior("normal(0, 0.1)" , class = "Intercept"),
                           set_prior("normal(0, 0.02)", class = "b", coef = "treatmentHeatwave"),
                           set_prior("normal(0, 0.02)", class = "b", coef = "treatmentExtendedseason"),
                           set_prior("normal(0.01,0.3)", class = "sigma"))
@@ -112,18 +112,21 @@ dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonf
                           cores = 3,
                           chains = 3,
                           prior = prior_root_biomass,
-                          family = gaussian(),
+                          family = lognormal(),
                           threads = threading(3),
                           init = 0)
-    plot(bayesian_model_gram)    
+      plot(bayesian_model_gram)    
     pp_check(bayesian_model_gram)   
     
-  # setting priors for graminoid data
-    prior_root_biomass <- c(set_prior("normal(-0.05,0.1)" , class = "Intercept"),
-                          set_prior("normal(0, 0.04)", class = "b", coef = "treatmentHeatwave"),
-                          set_prior("normal(0, 0.07)", class = "b", coef = "treatmentExtendedseason"),
-                          set_prior("normal(0.02,0.3)", class = "sigma"),
-                          set_prior("normal(5,3)", class = "alpha"))
+    
+    
+    
+    
+  # setting priors for graminoid shrub
+    prior_root_biomass <- c(set_prior("normal(-0.03,0.05)" , class = "Intercept"),
+                          set_prior("normal(0, 0.02)", class = "b", coef = "treatmentHeatwave"),
+                          set_prior("normal(0, 0.02)", class = "b", coef = "treatmentExtendedseason"),
+                          set_prior("normal(0.01,0.3)", class = "sigma"))
     
     hist(graminoid$pft_biomass)
     hist(shrub$pft_biomass)
