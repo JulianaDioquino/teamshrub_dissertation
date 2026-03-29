@@ -142,20 +142,28 @@ preds_delta <- preds_full[,.(`Heat wave` = `Heat wave` - Control ,
                              `Extended season` =`Extended season` - Control)]
 
 # plot set up
-preds_full <- melt(preds_full, variable.name = "treatment", value.name = "Estimate")
+preds_full <- melt(preds_full, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
 preds_full$treatment <- as.factor(preds_full$treatment)
 
-preds_delta <- melt(preds_delta, variable.name = "treatment", value.name = "Estimate")
+preds_delta <- melt(preds_delta, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
 
 # distribution of the mean plot
-ggplot(preds, aes(x = treatment, y = Estimate)) +
-  geom_violin(data = preds_full, aes(fill = treatment)) +
-  geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white") + 
-  geom_point(data = shrub, aes(y = pft_biomass, x = treatment)) +
-  theme_classic() +
+ggplot(preds,aes(x = treatment,y = Estimate))+
+  geom_violin(data = preds_full, trim = FALSE, alpha = 1, aes(fill = treatment))+
+  geom_pointrange(aes(ymin =  Q5, ymax = Q95),color="white")+
+  geom_point(data = shrub,aes(y = pft_biomass,x = treatment), alpha = 0.6, size = 2)+
+  theme_classic()+  
   scale_fill_manual(values = c("Control" = "#6c6563",
                                "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))
+                               "Extended season" = "#bbbc81")) +
+  labs(x = "Treatment",
+       y = "Root biomass estimate") +
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
+        axis.title.x = element_text(size = 15, margin = margin(t = 10), face = "bold"),
+        axis.title.y = element_text(size = 15, margin = margin(r = 10), face = "bold")) 
 
 # how much of the delta control - treatment is positive? 
   # if more than 90% i'm confident in treatment effect
@@ -195,10 +203,10 @@ preds_delta <- preds_full[,.(`Heat wave` = `Heat wave` - Control ,
                              `Extended season` =`Extended season` - Control)]
 
 # plot set up
-preds_full <- melt(preds_full, variable.name = "treatment", value.name = "Estimate")
 preds_full$treatment <- as.factor(preds_full$treatment)
+preds_full <- melt(preds_full, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
 
-preds_delta <- melt(preds_delta, variable.name = "treatment", value.name = "Estimate")
+preds_delta <- melt(preds_delta, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
 
 # distribution of the mean plot
 ggplot(preds, aes(x = treatment, y = Estimate)) +
