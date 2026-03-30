@@ -165,6 +165,7 @@ plot_shrub1 <- ggplot(preds_shrub, aes(x = treatment, y = Estimate)) +
         axis.title.x = element_text(size = 15, margin = margin(t = 5)),
         axis.title.y = element_text(size = 15, margin = margin(r = 1)))
 plot_shrub1
+
 # how much of the delta control - treatment is positive? 
 # if more than 90% i'm confident in treatment effect
 preds_delta[,1-mean(Estimate < 0), by = treatment]
@@ -231,7 +232,7 @@ preds_delta_gram <- melt(preds_delta_gram, measure.vars = names(preds_delta_gram
 
 # distribution of the mean plot
 plot_gram1 <- ggplot(preds_gram, aes(x = treatment, y = Estimate)) +
-              geom_violin(data = preds_full_gram, trim = FALSE, alpha = 0.8, aes(fill = treatment)) +
+              geom_violin(data = preds_full_gram, alpha = 0.8, aes(fill = treatment)) +
               geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 0.7) + 
               geom_point(data = graminoid, aes(y = pft_biomass, x = treatment), alpha = 0.6, size = 2) +
               theme_classic() +
@@ -284,13 +285,13 @@ plot_gram2 <- ggplot(preds_delta_gram, aes(x = Estimate, fill = treatment)) +
                         size = 5.5,
                         hjust = 0,
                         fontface = "plain") 
-              
   
 plot_gram2
 
 ### combining plots
-plot_shrub1 <- plot_shrub1 + ggtitle(NULL)
-plot_gram1 <- plot_gram1 + ggtitle(NULL)
+plot_shrub1 <- plot_shrub1 + ggtitle(NULL) + coord_cartesian(ylim = c(-0.05, 0.05))
+plot_gram1 <- plot_gram1 + ggtitle(NULL) + coord_cartesian(ylim = c(-0.05, 0.05))
+
 
 (plot_shrub1 | plot_gram1) +
   plot_layout(axis_titles = "collect") +
@@ -299,7 +300,8 @@ plot_gram1 <- plot_gram1 + ggtitle(NULL)
         plot.tag = element_text(face = "bold", size = 20))
 
 
-plot_shrub2 <- plot_shrub2 + ggtitle(NULL)
+plot_shrub2 <- plot_shrub2 + ggtitle(NULL) + coord_cartesian(ylim = c(-2, 2))
+
 plot_gram2 <- plot_gram2 + ggtitle(NULL)
 
 (plot_shrub2 | plot_gram2) +
