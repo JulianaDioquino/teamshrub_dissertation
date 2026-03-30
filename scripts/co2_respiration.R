@@ -53,8 +53,8 @@ ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux
   labs(x = "Root biomass (g)",
        y = "Cumulative CO₂ respiration (µmol m⁻²)") +
   scale_color_manual(values = c("Control" = "#6c6563",
-                               "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81")) +
+                                "Heat wave" = "#b56d5e",
+                                "Extended season" = "#bbbc81")) +
   scale_fill_manual(values = c("Control" = "#6c6563",
                                "Heat wave" = "#b56d5e",
                                "Extended season" = "#bbbc81")) +
@@ -62,14 +62,15 @@ ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux
   theme(legend.position = c(0.13, 0.8),
         legend.title = element_blank(),
         legend.text = element_text(size = 10),
-        axis.text = element_text(size = 9),
-        axis.title.x = element_text(size = 13, margin = margin(t = 12)),
-        axis.title.y = element_text(size = 13, margin = margin(r = 12))) +
+        axis.text = element_text(size = 10),
+        axis.title.x = element_text(size = 15, margin = margin(t = 12)),
+        axis.title.y = element_text(size = 15, margin = margin(r = 12))) +
   annotate("text",
            x = 0.023,
            y = 0.8e7,
            label = "Treatment: p < 0.001, Root biomass: p < 0.01",
-           hjust = 0)
+           hjust = 0,
+           size = 5.5)
 
 
 # co2 flux ~ root biomass by treatment analysis
