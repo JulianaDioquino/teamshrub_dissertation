@@ -2,6 +2,7 @@ library(tidyverse)
 library(ggplot2)
 library(dunn.test)
 library(dplyr)
+library(brms)
 
 root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
   mutate(treatment = factor(treatment,
@@ -39,7 +40,7 @@ co2_flux_shifted <- co2_flux %>%
                             levels = c("Control", "Heatwave", "Extended"),
                             labels = c("Control", "Heat wave", "Extended season")))
 
-# calculated co2 flux for each plant
+# calculated co2 flux x darkness for each plant
 avg_season_flux <- co2_flux_shifted %>%
   group_by(plant_id, Treatment) %>%
   summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
@@ -53,5 +54,19 @@ avg_season_flux <- co2_flux_shifted %>%
   plant_avg_flux <- co2_flux_shifted %>%
     group_by(plant_id, Treatment) %>%
     summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
-  
+
+# root biomass x darkness for each plant
+root_biomass_extended<- root_morphology %>%
+  filter(plant_id %in% c(1, 8, 6, 7, 10, 16, 18)) %>%
+  mutate(darkness = "Darkness") %>%
+  group_by(plant_id, darkness, treatment) %>%
+  summarize(total_root_biomass = median(total_root_biomass))
+
+ratio_data_org_ctrl_hw_sing <- root_morph_separated %>%
+  filter(plant_id %in% c(4, 5, 9, 14, 15, 17, 20,	2, 3, 11, 12, 13, 19, 21)) %>%
+  mutate(darkness = "Darkness") %>%
+  group_by(plant_id, darkness, treatment) %>%
+  summarize(total_root_biomass = median(total_root_biomass))
+
+combined_darkness_ratio_all <- bind_rows(ratio_data_org_ext_sing, ratio_data_org_ctrl_hw_sing)   
   
