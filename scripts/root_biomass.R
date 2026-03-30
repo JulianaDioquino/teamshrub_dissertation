@@ -4,6 +4,7 @@ library(dunn.test)
 library(dplyr)
 library(data.table)
 library(brms)
+library(patchwork)
 
 R.version.string
 Sys.setenv(PATH = paste0("C:\\rtools43\\usr\\bin;", Sys.getenv("C:\rtools43")))
@@ -82,7 +83,7 @@ shrub <-  root_morphology %>%
 dunn.test(root_morphology$pft_biomass, root_morphology$treatment, method = "bonferroni")
 
 
-# graminoid bayesian analysis 
+# GRAMINOID bayesian analysis 
 prior_root_biomass <- set_prior("normal(-0.03,0.05)" , class = "Intercept")
 prior_root_biomass <- c(prior_root_biomass,set_prior("normal(0,0.03)" , class = "b" , coef  = "treatmentHeatwave"))
 prior_root_biomass <- c(prior_root_biomass,set_prior("normal(0,0.03)" , class = "b" , coef  = "treatmentExtendedseason"))
@@ -107,7 +108,7 @@ pp_check(bayesian_model_gram)
 
 
 
-# shrub bayesian analysis
+# SHRUB bayesian analysis
 prior_root_biomass <- set_prior("normal(-0.05,0.15)" , class = "Intercept")
 prior_root_biomass <- c(prior_root_biomass,set_prior("normal(0,0.09)" , class = "b" , coef  = "treatmentHeatwave"))
 prior_root_biomass <- c(prior_root_biomass,set_prior("normal(0,0.09)" , class = "b" , coef  = "treatmentExtendedseason"))
@@ -145,48 +146,70 @@ preds_delta <- preds_full[,.(`Heat wave` = `Heat wave` - Control ,
 preds_full <- melt(preds_full, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
 preds_full$treatment <- as.factor(preds_full$treatment)
 
-preds_delta <- melt(preds_delta, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
+preds_delta <- melt(preds_delta, measure.vars = names(preds_delta), variable.name = "treatment", value.name = "Estimate")
 
 # distribution of the mean plot
-ggplot(preds,aes(x = treatment,y = Estimate))+
-  geom_violin(data = preds_full, trim = FALSE, alpha = 1, aes(fill = treatment))+
-  geom_pointrange(aes(ymin =  Q5, ymax = Q95),color="white")+
-  geom_point(data = shrub,aes(y = pft_biomass,x = treatment), alpha = 0.6, size = 2)+
-  theme_classic()+  
+ggplot(preds,aes(x = treatment,y = Estimate)) +
+  geom_violin(data = preds_full, trim = FALSE, alpha = 0.8, aes(fill = treatment)) +
+  geom_pointrange(aes(ymin =  Q5, ymax = Q95),color="white", alpha = 0.7) +
+  geom_point(data = shrub,aes(y = pft_biomass,x = treatment), alpha = 0.6, size = 2) +
+  theme_classic() +  
   scale_fill_manual(values = c("Control" = "#6c6563",
                                "Heat wave" = "#b56d5e",
                                "Extended season" = "#bbbc81")) +
   labs(x = "Treatment",
-       y = "Root biomass estimate") +
+       y = "Estimated root biomass") +
   theme(legend.position = "none",
         legend.title = element_blank(),
         legend.text = element_text(size = 10),
-        axis.text = element_text(size = 12),
-        axis.title.x = element_text(size = 15, margin = margin(t = 10), face = "bold"),
-        axis.title.y = element_text(size = 15, margin = margin(r = 10), face = "bold")) 
+        strip.text = element_blank(),
+        panel.spacing = unit(1, "lines"),
+        axis.text = element_text(size = 10),
+        axis.title.x = element_text(size = 12, margin = margin(t = 5)),
+        axis.title.y = element_text(size = 12, margin = margin(r = 1))) 
 
 # how much of the delta control - treatment is positive? 
   # if more than 90% i'm confident in treatment effect
 preds_delta[,1-mean(Estimate < 0), by = treatment]
 preds_delta[,mean(Estimate), by = treatment]
 
-ggplot(preds_delta, aes(x = Estimate, fill = treatment)) + 
-  geom_vline(xintercept = 0, lty = 2) +
-  geom_density(alpha = 0.5) +
-  theme_classic()+  
-  scale_fill_manual(values = c("Control" = "#6c6563",
-                               "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))+
-  facet_wrap(~treatment,scales = "free_y",nrow = 3)
+preds_delta$treatment <- factor(preds_delta$treatment,
+                                levels = c("Heat wave", "Extended season", "Control"))
 
-# distribution of the delta control - treatment, JB doesn't like
-ggplot(preds_delta,aes(x = treatment, y = Estimate ,fill = treatment ))+
-  geom_hline(yintercept = 0,lty = 2)+
-  geom_violin(alpha = 0.95)+
-  theme_classic()+  
-  scale_fill_manual(values = c("Control" = "#6c6563",
-                               "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))
+shrub2 <- ggplot(preds_delta, aes(x = Estimate, fill = treatment)) + 
+          geom_vline(xintercept = 0, linetype = "dashed", linewidth = 1, color = "black") +
+          geom_density(alpha = 0.5) +
+          theme_classic()+  
+          scale_fill_manual(values = c("Control" = "#6c6563",
+                                       "Heat wave" = "#b56d5e",
+                                       "Extended season" = "#bbbc81")) +
+          labs(x = "Estimated difference in root biomass",
+               y = "Probability density") +
+          facet_wrap(~treatment,scales = "free_y",nrow = 3, strip.position = "right") +
+          theme(legend.position = "none",
+                legend.title = element_blank(),
+                legend.text = element_text(size = 10),
+                strip.text = element_text(angle = 0, size = 12),
+                  strip.background = element_rect(fill = "lightgrey", color = "black"), 
+                panel.spacing = unit(1, "lines"),
+                axis.text = element_text(size = 10),
+                axis.title.x = element_text(size = 12, margin = margin(t = 5)),
+                axis.title.y = element_text(size = 12, margin = margin(r = 1))) +
+          geom_segment(data = subset(preds_delta, treatment == "Extended season"),
+                       aes(x = 0.03, y = 25, xend = 0.15, yend = 25),
+                       arrow = arrow(type = "open", length = unit(0.2, "inches")),
+                       color = "#6c6563",
+                       linewidth = 2.5) +
+          geom_text(data = subset(preds_delta, treatment == "Heat wave"),
+                    aes(x = 0.02, y = 70, label = "33% chance shrub root\nbiomass increases"),
+                    size = 5.5,
+                    hjust = 0,
+                    fontface = "plain") +
+          geom_text(data = subset(preds_delta, treatment == "Extended season"),
+                    aes(x = 0.03, y = 40, label = "93% chance shrub root\nbiomass increases"),
+                    size = 5.5,
+                    hjust = 0,
+                    fontface = "plain") 
 
 
 
@@ -203,41 +226,67 @@ preds_delta <- preds_full[,.(`Heat wave` = `Heat wave` - Control ,
                              `Extended season` =`Extended season` - Control)]
 
 # plot set up
-preds_full$treatment <- as.factor(preds_full$treatment)
 preds_full <- melt(preds_full, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
+preds_full$treatment <- as.factor(preds_full$treatment)
 
-preds_delta <- melt(preds_delta, measure.vars = names(preds_full), variable.name = "treatment", value.name = "Estimate")
+preds_delta <- melt(preds_delta, measure.vars = names(preds_delta), variable.name = "treatment", value.name = "Estimate")
 
 # distribution of the mean plot
 ggplot(preds, aes(x = treatment, y = Estimate)) +
-  geom_violin(data = preds_full, aes(fill = treatment)) +
-  geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white") + 
-  geom_point(data = graminoid, aes(y = pft_biomass, x = treatment)) +
+  geom_violin(data = preds_full, trim = FALSE, alpha = 0.8, aes(fill = treatment)) +
+  geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 0.7) + 
+  geom_point(data = graminoid, aes(y = pft_biomass, x = treatment), alpha = 0.6, size = 2) +
   theme_classic() +
   scale_fill_manual(values = c("Control" = "#6c6563",
                                "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))
+                               "Extended season" = "#bbbc81")) +
+  labs(x = "Treatment",
+       y = "Estimated root biomass") +
+  theme(legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        strip.text = element_blank(),
+        panel.spacing = unit(1, "lines"),
+        axis.text = element_text(size = 10),
+        axis.title.x = element_text(size = 12, margin = margin(t = 5)),
+        axis.title.y = element_text(size = 12, margin = margin(r = 1))) 
 
 # how much of the delta control - treatment is positive? 
 # if more than 90% i'm confident in treatment effect
 preds_delta[,1-mean(Estimate < 0), by = treatment]
 preds_delta[,mean(Estimate), by = treatment]
 
-ggplot(preds_delta, aes(x = Estimate, fill = treatment)) + 
-  geom_vline(xintercept = 0, lty = 2) +
-  geom_density(alpha = 0.5) +
-  theme_classic()+  
-  scale_fill_manual(values = c("Control" = "#6c6563",
-                               "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))+
-  facet_wrap(~treatment,scales = "free_y",nrow = 3)
+gram2 <- ggplot(preds_delta, aes(x = Estimate, fill = treatment)) + 
+          geom_vline(xintercept = 0, linetype = "dashed", linewidth = 1, color = "black") +
+          geom_density(alpha = 0.5) +
+          theme_classic()+  
+          scale_fill_manual(values = c("Control" = "#6c6563",
+                                       "Heat wave" = "#b56d5e",
+                                       "Extended season" = "#bbbc81"))+
+          labs(x = "Estimated difference in root biomass",
+               y = "Probability density") +
+          facet_wrap(~treatment, scales = "free_y", nrow = 3, strip.position = "right") +
+          theme(legend.position = "none",
+                legend.title = element_blank(),
+                legend.text = element_text(size = 10),
+                strip.text = element_text(angle = 90, size = 12),
+                  strip.background = element_rect(fill = "lightgrey", color = "black"),
+                panel.spacing = unit(1, "lines"),
+                axis.text = element_text(size = 10),
+                axis.title.x = element_text(size = 12, margin = margin(t = 5)),
+                axis.title.y = element_text(size = 12, margin = margin(r = 1))) +
+          geom_text(data = subset(preds_delta, treatment == "Heat wave"),
+                    aes(x = 0.008, y = 200, label = "55% chance graminoid\nroot biomass increases"),
+                    size = 5.5,
+                    hjust = 0,
+                    fontface = "plain") +
+          geom_text(data = subset(preds_delta, treatment == "Extended season"),
+                    aes(x = 0.008, y = 225, label = "48% chance graminoid\nroot biomass increases"),
+                    size = 5.5,
+                    hjust = 0,
+                    fontface = "plain")
+        
 
-# distribution of the delta control - treatment, JB doesn't like
-ggplot(preds_delta,aes(x = treatment, y = Estimate ,fill = treatment ))+
-  geom_hline(yintercept = 0,lty = 2)+
-  geom_violin(alpha = 0.95)+
-  theme_classic()+  
-  scale_fill_manual(values = c("Control" = "#6c6563",
-                               "Heat wave" = "#b56d5e",
-                               "Extended season" = "#bbbc81"))
-
+### combining plots
+(shrub2 | gram2) +
+  plot_annotation(tag_levels = "A")
