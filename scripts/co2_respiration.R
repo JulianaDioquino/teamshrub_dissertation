@@ -3,6 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(lmerTest)
 library(lme4)
+library(brms)
 
 root_data <- read.csv(file = "data_raw/branch_root_data.csv") %>%
   mutate(treatment = factor(treatment,
@@ -79,19 +80,44 @@ anova(flux_root_combine_anova)
 plot(flux_root_combine_anova)
 summary(flux_root_combine_anova)
 
-library(brms)
 
-bayesian_model_respiration <- brm( total_co2_flux ~ treatment*total_root_biomass , # |  trunc(lb=0)  # model formula
+
+
+get_prior((total_co2_flux*86400) ~ total_root_biomass * Treatment, data = flux_root_combine)
+
+
+# bayesian analysis
+prior_co2 <- set_prior("normal(5e6, 5e6)", class = "Intercept")
+
+# prior for root biomass
+prior_co2 <- c(prior_co2, set_prior("normal(5e7, 5e7)", class = "b", coef = "total_root_biomass"))
+# prior for treatment effects
+prior_co2 <- c(prior_co2, set_prior("normal(0, 5e6)", class = "b", coef = "TreatmentHeatwave"),
+                          set_prior("normal(0, 5e6)", class = "b", coef = "TreatmentExtendedseason"))
+# prior for interactions
+prior_co2 <- c(prior_co2, set_prior("normal(0, 3e7)", class = "b", coef = "total_root_biomass:TreatmentHeatwave"),
+                          set_prior("normal(2e7, 3e7)", class = "b", coef = "total_root_biomass:TreatmentExtendedseason"))
+# prior for variance
+prior_co2 <- c(prior_co2, set_prior("normal(0.02, 0.05)", class = "sigma"))
+
+
+bayesian_model_respiration <- brm((total_co2_flux*86400) ~ total_root_biomass*Treatment, # |  trunc(lb=0)  # model formula
                        data = flux_root_combine, # dataset
                        iter = 5000, # number of smapling iteration
                        warmup = 1000, # discarded iterations at the start
                        cores = 3, # a core compute a chain, 3 time faster
                        chains = 3, # number of independant models that we want to converge
-                       #prior = prior_root_biomass ,
-                      # control = list(adapt_delta = 0.99),
+                       prior = prior_co2,
+                       control = list(adapt_delta = 0.99),
                        family = gaussian(), # distribution
                        #threads = threading(3), # even faster
                        init = 0) # more stable sampling
 
-
+summary(bayesian_model_respiration, prob = 0.9)
+plot(bayesian_model_respiration)
 pp_check(bayesian_model_respiration)
+
+
+
+# statistical reporting with the fit models
+new_data_co2
