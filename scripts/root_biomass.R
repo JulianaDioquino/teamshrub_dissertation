@@ -152,18 +152,21 @@ preds_full_shrub$treatment <- as.factor(preds_full_shrub$treatment)
 # distribution of the mean plot
 plot_shrub1 <- ggplot(preds_shrub, aes(x = treatment, y = Estimate)) +
   geom_violin(data = preds_full_shrub, trim = FALSE, alpha = 0.8, aes(fill = treatment)) +
-  geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 0.7) +
-  geom_point(data = shrub, aes(y = pft_biomass, x = treatment), alpha = 0.6, size = 2) +
+  geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 1) +
+  geom_jitter(data = shrub, aes(y = pft_biomass, x = treatment), alpha = 0.4, size = 1.5, width = 0.05) +
   theme_classic() +
   scale_fill_manual(values = c("Control" = "#6c6563",
                                "Heat wave" = "#b56d5e",
                                "Extended season" = "#bbbc81")) +
   labs(x = "Treatment",
-       y = "Estimated root biomass") +
+       y = "Estimated root biomass (g)") +
+  theme_update(plot.title = element_text(hjust = 0.5, face = "bold", size = (15))) +
+  ggtitle("Shrub") +
+  theme_set(theme_classic()) +
   theme(legend.position = "none",
         axis.text = element_text(size = 10),
         axis.title.x = element_text(size = 15, margin = margin(t = 5)),
-        axis.title.y = element_text(size = 15, margin = margin(r = 1)))
+        axis.title.y = element_text(size = 15, margin = margin(r = 7)))
 plot_shrub1
 
 # how much of the delta control - treatment is positive? 
@@ -181,33 +184,35 @@ plot_shrub2 <- ggplot(preds_delta, aes(x = Estimate, fill = treatment)) +
                 scale_fill_manual(values = c("Control" = "#6c6563",
                                              "Heat wave" = "#b56d5e",
                                              "Extended season" = "#bbbc81")) +
-                labs(x = "Estimated difference in root biomass",
+                labs(x = "Posterior distribution of the difference in root biomass (g)",
                      y = "Probability density") +
+                theme_update(plot.title = element_text(hjust = 0.5, face = "bold", size = (15))) +
+                ggtitle("Shrub") +
+                theme_set(theme_classic()) +
                 facet_wrap(~treatment,scales = "free_y",nrow = 3) +
+                geom_segment(data = subset(preds_delta, treatment == "Extended season"),
+                             aes(x = -0.07, y = 25, xend = -0.02, yend = 25),
+                             arrow = arrow(type = "open", length = unit(0.1, "inches")),
+                             color = "#6c6563",
+                             linewidth = 2) +
+                geom_text(data = subset(preds_delta, treatment == "Heat wave"),
+                          aes(x = -0.085, y = 70, label = "33% chance root\nbiomass increases"),
+                          size = 4.5,
+                          hjust = 0,
+                          fontface = "plain") +
+                geom_text(data = subset(preds_delta, treatment == "Extended season"),
+                          aes(x = -0.08, y = 40, label = "93% chance root\nbiomass increases"),
+                          size = 4.5,
+                          hjust = 0,
+                          fontface = "plain") +
                 theme(legend.position = "none",
                       legend.title = element_blank(),
                       legend.text = element_text(size = 10),
                       strip.text = element_blank(),
-                      strip.background = element_blank(), 
                       panel.spacing = unit(1, "lines"),
                       axis.text = element_text(size = 10),
                       axis.title.x = element_text(size = 15, margin = margin(t = 5)),
-                      axis.title.y = element_text(size = 15, margin = margin(r = 1))) +
-                geom_segment(data = subset(preds_delta, treatment == "Extended season"),
-                             aes(x = 0.03, y = 25, xend = 0.15, yend = 25),
-                             arrow = arrow(type = "open", length = unit(0.2, "inches")),
-                             color = "#6c6563",
-                             linewidth = 2.5) +
-                geom_text(data = subset(preds_delta, treatment == "Heat wave"),
-                          aes(x = 0.02, y = 70, label = "33% chance shrub root\nbiomass increases"),
-                          size = 5.5,
-                          hjust = 0,
-                          fontface = "plain") +
-                geom_text(data = subset(preds_delta, treatment == "Extended season"),
-                          aes(x = 0.03, y = 40, label = "93% chance shrub root\nbiomass increases"),
-                          size = 5.5,
-                          hjust = 0,
-                          fontface = "plain") 
+                      axis.title.y = element_text(size = 15, margin = margin(r = 7))) 
 plot_shrub2
 
 
@@ -233,14 +238,16 @@ preds_delta_gram <- melt(preds_delta_gram, measure.vars = names(preds_delta_gram
 # distribution of the mean plot
 plot_gram1 <- ggplot(preds_gram, aes(x = treatment, y = Estimate)) +
               geom_violin(data = preds_full_gram, alpha = 0.8, aes(fill = treatment)) +
-              geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 0.7) + 
-              geom_point(data = graminoid, aes(y = pft_biomass, x = treatment), alpha = 0.6, size = 2) +
-              theme_classic() +
+              geom_pointrange(aes(ymin = Q5, ymax = Q95), color = "white", alpha = 1) + 
+              geom_jitter(data = graminoid, aes(y = pft_biomass, x = treatment), alpha = 0.4, size = 1.5, width = 0.05) +              theme_classic() +
               scale_fill_manual(values = c("Control" = "#6c6563",
                                            "Heat wave" = "#b56d5e",
                                            "Extended season" = "#bbbc81")) +
               labs(x = "Treatment",
-                   y = "Estimated root biomass") +
+                   y = "Estimated root biomass (g)") +
+              theme_update(plot.title = element_text(hjust = 0.5, face = "bold", size = (15))) +
+              ggtitle("Graminoid") +
+              theme_set(theme_classic()) +
               theme(legend.position = "none",
                     legend.title = element_blank(),
                     legend.text = element_text(size = 10),
@@ -248,7 +255,9 @@ plot_gram1 <- ggplot(preds_gram, aes(x = treatment, y = Estimate)) +
                     panel.spacing = unit(1, "lines"),
                     axis.text = element_text(size = 10),
                     axis.title.x = element_text(size = 15, margin = margin(t = 5)),
-                    axis.title.y = element_text(size = 15, margin = margin(r = 1))) 
+                    axis.title.y = element_text(size = 15, margin = margin(r = 7))) 
+
+
 plot_gram1
 
 # how much of the delta control - treatment is positive? 
@@ -263,34 +272,37 @@ plot_gram2 <- ggplot(preds_delta_gram, aes(x = Estimate, fill = treatment)) +
               scale_fill_manual(values = c("Control" = "#6c6563",
                                            "Heat wave" = "#b56d5e",
                                            "Extended season" = "#bbbc81"))+
-              labs(x = "Estimated difference in root biomass",
+              labs(x = "Posterior distribution of the difference in root biomass (g)",
                    y = "Probability density") +
+              theme_update(plot.title = element_text(hjust = 0.5, face = "bold", size = (15))) +
+              ggtitle("Graminoid") +
+              theme_set(theme_classic()) +
               facet_wrap(~treatment, scales = "free_y", nrow = 3, strip.position = "right") +
+              geom_text(data = subset(preds_delta, treatment == "Heat wave"),
+                        aes(x = -0.025, y = 200, label = "55% chance root\nbiomass increases"),
+                        size = 4.5,
+                        hjust = 0,
+                        fontface = "plain") +
+              geom_text(data = subset(preds_delta, treatment == "Extended season"),
+                        aes(x = -0.025, y = 225, label = "48% chance root\nbiomass increases"),
+                        size = 4.5,
+                        hjust = 0,
+                        fontface = "plain") +
               theme(legend.position = "none",
                     legend.title = element_blank(),
                     legend.text = element_text(size = 10),
                     strip.text = element_text(angle = 90, size = 12),
-                      strip.background = element_rect(fill = "white", color = "black"),
                     panel.spacing = unit(1, "lines"),
                     axis.text = element_text(size = 10),
                     axis.title.x = element_text(size = 15, margin = margin(t = 5)),
-                    axis.title.y = element_text(size = 15, margin = margin(r = 1))) +
-              geom_text(data = subset(preds_delta, treatment == "Heat wave"),
-                        aes(x = 0.008, y = 200, label = "55% chance graminoid\nroot biomass increases"),
-                        size = 5.5,
-                        hjust = 0,
-                        fontface = "plain") +
-              geom_text(data = subset(preds_delta, treatment == "Extended season"),
-                        aes(x = 0.008, y = 225, label = "48% chance graminoid\nroot biomass increases"),
-                        size = 5.5,
-                        hjust = 0,
-                        fontface = "plain") 
+                    axis.title.y = element_text(size = 15, margin = margin(r = 7))) 
   
 plot_gram2
 
 ### combining plots
-plot_shrub1 <- plot_shrub1 + ggtitle(NULL) + coord_cartesian(ylim = c(-0.05, 0.05))
-plot_gram1 <- plot_gram1 + ggtitle(NULL) + coord_cartesian(ylim = c(-0.05, 0.05))
+
+plot_shrub1 <- plot_shrub1 + coord_cartesian(ylim = c(0, 0.1))
+plot_gram1 <- plot_gram1 + coord_cartesian(ylim = c(0, 0.1))
 
 
 (plot_shrub1 | plot_gram1) +
@@ -300,13 +312,14 @@ plot_gram1 <- plot_gram1 + ggtitle(NULL) + coord_cartesian(ylim = c(-0.05, 0.05)
         plot.tag = element_text(face = "bold", size = 20))
 
 
-plot_shrub2 <- plot_shrub2 + ggtitle(NULL) + coord_cartesian(ylim = c(-2, 2))
-
-plot_gram2 <- plot_gram2 + ggtitle(NULL)
+plot_shrub2 <- plot_shrub2 + coord_cartesian(xlim = c(-0.1, 0.1))
+plot_gram2 <- plot_gram2 + coord_cartesian(xlim = c(-0.03, 0.03))
 
 (plot_shrub2 | plot_gram2) +
   plot_layout(axis_titles = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "none",
         plot.tag = element_text(face = "bold", size = 20))
+
+
 
