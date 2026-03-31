@@ -34,6 +34,12 @@ co2_flux_shifted <- co2_flux %>%
                             levels = c("Control", "Heatwave", "Extended"),
                             labels = c("Control", "Heat wave", "Extended season")))
 
+root_morphology <- root_data %>%
+  pivot_longer(cols = shrub_biomass:graminoid_biomass,
+               names_to = "functional_type_biomass",
+               values_to = "pft_biomass") %>%
+  filter(pft_biomass != "NA")
+
 
 # calculated co2 flux for each plant
 avg_season_flux <- co2_flux_shifted %>%
@@ -83,7 +89,84 @@ summary(flux_root_combine_anova)
 
 
 
-get_prior((total_co2_flux*86400) ~ total_root_biomass * Treatment, data = flux_root_combine)
+
+
+# calculated co2 flux for each plant
+avg_season_flux <- co2_flux_shifted %>%
+  group_by(plant_id, Treatment) %>%
+  summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
+
+
+# combining co2 flux with root data frames
+flux_pftroot_combine <- left_join(avg_season_flux, root_morphology, by = 'plant_id') %>%
+  filter(Treatment != "NA",
+         total_root_biomass != "NA")
+
+# co2 flux ~ PFT biomass by treatment graph
+ggplot(data = flux_pftroot_combine, aes(x = pft_biomass, y = (total_co2_flux*86400), color = Treatment, fill = Treatment)) +
+  geom_smooth(method = lm, alpha = 0.2, size = 1) +
+  geom_point(alpha = 0.4) +
+  facet_grid(col = vars(functional_type_biomass),
+             labeller = labeller(functional_type_biomass = c("graminoid_biomass" = "Graminoid",
+                                                             "shrub_biomass" = "Shrub"))) + 
+  labs(x = "Root biomass (g)",
+       y = "Cumulative CO₂ respiration (µmol m⁻²)") +
+  scale_color_manual(values = c("Control" = "#6c6563",
+                                "Heat wave" = "#b56d5e",
+                                "Extended season" = "#bbbc81")) +
+  scale_fill_manual(values = c("Control" = "#6c6563",
+                               "Heat wave" = "#b56d5e",
+                               "Extended season" = "#bbbc81")) +
+  theme_classic() +
+  theme(legend.position = c(0.13, 0.8),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        axis.title.x = element_text(size = 15, margin = margin(t = 12)),
+        axis.title.y = element_text(size = 15, margin = margin(r = 12))) +
+  annotate("text",
+           x = 0.023,
+           y = 0.8e7,
+           label = "",
+           hjust = 0,
+           size = 5.5)
+
+# co2 flux ~ PFT biomass by treatment analysis
+flux_pftroot_combine_anova <- lm((total_co2_flux*86400) ~ treatment*pft_biomass*functional_type_biomass, data = flux_pftroot_combine)
+  ## treatment has a sig. effect
+
+anova(flux_pftroot_combine_anova)
+plot(flux_pftroot_combine_anova)
+summary(flux_pftroot_combine_anova)
+
+shrub_data <- flux_pftroot_combine %>%
+  filter(functional_type_biomass == "shrub_biomass")
+
+    shrub_data_anova <- lm((total_co2_flux*86400) ~ treatment*pft_biomass, data = shrub_data)
+      
+      anova(shrub_data_anova)
+          # treatment had a significant effect
+      
+gram_data <- flux_pftroot_combine %>%
+  filter(functional_type_biomass == "graminoid_biomass")
+    
+    gram_data_anova <- lm((total_co2_flux*86400) ~ treatment*pft_biomass, data = gram_data)
+    
+      anova(gram_data_anova)
+        # no significant effect
+      
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
 
 
 # bayesian analysis
