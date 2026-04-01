@@ -46,12 +46,13 @@ avg_season_flux <- co2_flux_shifted %>%
   group_by(plant_id, Treatment) %>%
   summarise(total_co2_flux = sum(seasonal_co2_flux, na.rm = TRUE))
 
-
+avg_season_flux$plant_id <- as.character(avg_season_flux$plant_id)
 # combining co2 flux with root data frames
 flux_root_combine <- left_join(avg_season_flux, root_data, by = 'plant_id') %>%
   filter(Treatment != "NA",
          total_root_biomass != "NA")
 
+flux_root_combine$total_root_biomass <- as.numeric(flux_root_combine$total_root_biomass)
 
 # co2 flux ~ root biomass by treatment graph
 ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux*86400), color = Treatment, fill = Treatment)) +
@@ -170,21 +171,21 @@ gram_data <- flux_pftroot_combine %>%
 
 
 # bayesian analysis
-prior_co2 <- set_prior("normal(5e6, 5e6)", class = "Intercept")
+prior_co2 <- set_prior("normal(150, 75)", class = "Intercept")
 
 # prior for root biomass
-prior_co2 <- c(prior_co2, set_prior("normal(5e7, 5e7)", class = "b", coef = "total_root_biomass"))
+prior_co2 <- c(prior_co2, set_prior("normal(1000, 750)", class = "b", coef = "total_root_biomass"))
 # prior for treatment effects
-prior_co2 <- c(prior_co2, set_prior("normal(0, 5e6)", class = "b", coef = "TreatmentHeatwave"),
-                          set_prior("normal(0, 5e6)", class = "b", coef = "TreatmentExtendedseason"))
+prior_co2 <- c(prior_co2, set_prior("normal(0, 75)", class = "b", coef = "TreatmentHeatwave"),
+                          set_prior("normal(0, 75)", class = "b", coef = "TreatmentExtendedseason"))
 # prior for interactions
-prior_co2 <- c(prior_co2, set_prior("normal(0, 3e7)", class = "b", coef = "total_root_biomass:TreatmentHeatwave"),
-                          set_prior("normal(2e7, 3e7)", class = "b", coef = "total_root_biomass:TreatmentExtendedseason"))
+prior_co2 <- c(prior_co2, set_prior("normal(0, 500)", class = "b", coef = "total_root_biomass:TreatmentHeatwave"),
+                          set_prior("normal(0, 500)", class = "b", coef = "total_root_biomass:TreatmentExtendedseason"))
 # prior for variance
-prior_co2 <- c(prior_co2, set_prior("normal(0.02, 0.05)", class = "sigma"))
+prior_co2 <- c(prior_co2, set_prior("normal(50, 50)", class = "sigma"))
 
 
-bayesian_model_respiration <- brm((total_co2_flux*86400) ~ total_root_biomass*Treatment, # |  trunc(lb=0)  # model formula
+bayesian_model_respiration <- brm(total_co2_flux ~ total_root_biomass * Treatment, # |  trunc(lb=0)  # model formula
                        data = flux_root_combine, # dataset
                        iter = 5000, # number of smapling iteration
                        warmup = 1000, # discarded iterations at the start
@@ -200,6 +201,45 @@ summary(bayesian_model_respiration, prob = 0.9)
 plot(bayesian_model_respiration)
 pp_check(bayesian_model_respiration)
 
+conditional_effects(bayesian_model_respiration,effects = c("total_root_biomass:Treatment"))
+
+
+#### plot of the relationship, bayesian ####
+predicted_mean <- cbind(flux_root_combine,fitted(bayesian_model_respiration,
+                                              newdata = flux_root_combine ,
+                                              summary = T,
+                                              prob = c(0.05,0.95)))
+
+color_vector <-  c("Control" = "#6c6563", "Heat wave" = "#b56d5e", "Extended season" = "#bbbc81")
+
+
+
+# co2 flux ~ root biomass by treatment graph
+(plot_to_export <- ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux)*86400, color = Treatment, fill = Treatment)) +
+  #geom_smooth(method = lm, alpha = 0.2, size = 1) +
+  geom_line(aes(y = Estimate*86400), predicted_mean ,lwd = 0.9)+
+  geom_ribbon(aes(y = Estimate*86400, ymin = Q5*86400 ,ymax=Q95*86400), predicted_mean , alpha = 0.5,color = NA)+
+  geom_point(alpha = 0.4,size = 2) +
+  labs(x = "Root biomass (g)",
+       y = "Cumulative CO₂ respiration (µmol m⁻²)") +
+  scale_color_manual(values = color_vector) +
+  scale_fill_manual(values = color_vector) +
+  theme_classic() +
+  theme(legend.position = c(0.13, 0.8),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        axis.title.x = element_text(size = 15, margin = margin(t = 12)),
+        axis.title.y = element_text(size = 15, margin = margin(r = 12))) +
+  annotate("text",
+           x = 0.023,
+           y = 0.9e7,
+           label = "Treatment: p < 0.001\nRoot biomass: p < 0.001\nRoot biomass:Extended season: P < 0.1",
+           hjust = 0,
+           size = 4))
+
+ggsave(file.path("figures","Co2_root_plot_bayesian.jpg"),plot_to_export,
+       width = 180, height = 160, unit = "mm",dpi = 350)
 
 
 # statistical reporting with the fit models
