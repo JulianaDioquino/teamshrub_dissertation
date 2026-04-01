@@ -301,8 +301,8 @@ plot_gram2
 
 ### combining plots
 
-plot_shrub1 <- plot_shrub1 + coord_cartesian(ylim = c(0, 0.1))
-plot_gram1 <- plot_gram1 + coord_cartesian(ylim = c(0, 0.1))
+plot_shrub1 <- plot_shrub1 + coord_cartesian(ylim = c(0, 0.075))
+plot_gram1 <- plot_gram1 + coord_cartesian(ylim = c(0, 0.025))
 
 
 figure_1 <- (plot_shrub1 | plot_gram1) +
@@ -311,6 +311,11 @@ figure_1 <- (plot_shrub1 | plot_gram1) +
             theme(legend.position = "none",
                   plot.tag = element_text(face = "bold", size = 20))
 figure_1
+
+ggsave(file.path("figures","figure_1new.jpg"),figure_1,
+       width = 180, height = 160, unit = "mm",dpi = 350)
+
+
 
 plot_shrub2 <- plot_shrub2 + coord_cartesian(xlim = c(-0.1, 0.1))
 plot_gram2 <- plot_gram2 + coord_cartesian(xlim = c(-0.03, 0.03))
@@ -323,9 +328,6 @@ figure_2 <- (plot_shrub2 | plot_gram2) +
 figure_2
 
 ggsave(file.path("figures","figure_2.jpg"),figure_2,
-       width = 180, height = 160, unit = "mm",dpi = 350)
-
-ggsave(file.path("figures","figure_1.jpg"),figure_1,
        width = 180, height = 160, unit = "mm",dpi = 350)
 
 

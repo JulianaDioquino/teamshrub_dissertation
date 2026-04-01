@@ -221,7 +221,7 @@ color_vector <-  c("Control" = "#6c6563", "Heat wave" = "#b56d5e", "Extended sea
   geom_ribbon(aes(y = Estimate*86400, ymin = Q5*86400 ,ymax=Q95*86400), predicted_mean , alpha = 0.2,color = NA)+
   geom_point(alpha = 0.4,size = 2) +
   labs(x = "Root biomass (g)",
-       y = "Cumulative CO₂ respiration (µmol m⁻²day⁻¹)") +
+       y = "Cumulative CO₂ respiration (µmol m⁻²)") +
   scale_color_manual(values = color_vector) +
   scale_fill_manual(values = color_vector) +
   theme_classic() +
@@ -240,7 +240,7 @@ color_vector <-  c("Control" = "#6c6563", "Heat wave" = "#b56d5e", "Extended sea
   #          size = 4))
 
 ## old label: "Treatment: p < 0.001\nRoot biomass: p < 0.001\nRoot biomass:Extended season: P < 0.1"
-ggsave(file.path("figures","Co2_root_plot_bayesian2.jpg"),plot_to_export,
+ggsave(file.path("figures","Co2_root_plot_bayesian3.jpg"),plot_to_export,
        width = 180, height = 160, unit = "mm",dpi = 350)
 
 
