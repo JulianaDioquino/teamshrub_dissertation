@@ -217,30 +217,31 @@ color_vector <-  c("Control" = "#6c6563", "Heat wave" = "#b56d5e", "Extended sea
 # co2 flux ~ root biomass by treatment graph
 (plot_to_export <- ggplot(data = flux_root_combine, aes(x = total_root_biomass, y = (total_co2_flux)*86400, color = Treatment, fill = Treatment)) +
   #geom_smooth(method = lm, alpha = 0.2, size = 1) +
-  geom_line(aes(y = Estimate*86400), predicted_mean ,lwd = 0.9)+
-  geom_ribbon(aes(y = Estimate*86400, ymin = Q5*86400 ,ymax=Q95*86400), predicted_mean , alpha = 0.5,color = NA)+
+  geom_line(aes(y = Estimate*86400), predicted_mean ,lwd = 1)+
+  geom_ribbon(aes(y = Estimate*86400, ymin = Q5*86400 ,ymax=Q95*86400), predicted_mean , alpha = 0.2,color = NA)+
   geom_point(alpha = 0.4,size = 2) +
   labs(x = "Root biomass (g)",
-       y = "Cumulative CO₂ respiration (µmol m⁻²)") +
+       y = "Cumulative CO₂ respiration (µmol m⁻²day⁻¹)") +
   scale_color_manual(values = color_vector) +
   scale_fill_manual(values = color_vector) +
   theme_classic() +
-  theme(legend.position = c(0.13, 0.8),
+  theme(legend.position = c(0.87, 0.13),
         legend.title = element_blank(),
-        legend.text = element_text(size = 10),
+        legend.text = element_text(size = 12),
         axis.text = element_text(size = 10),
         axis.title.x = element_text(size = 15, margin = margin(t = 12)),
-        axis.title.y = element_text(size = 15, margin = margin(r = 12))) +
-  annotate("text",
-           x = 0.023,
-           y = 0.9e7,
-           label = "Treatment: p < 0.001\nRoot biomass: p < 0.001\nRoot biomass:Extended season: P < 0.1",
-           hjust = 0,
-           size = 4))
+        axis.title.y = element_text(size = 15, margin = margin(r = 12))))
+  
+  # annotate("text",
+  #          x = 0.04,
+  #          y = 0.9e7,
+  #          label = "Root biomass ↑ CO₂ flux (90% CrI > 0)\nExtended season increases CO₂ respiration\nNo clear heatwave or interaction effects",
+  #          hjust = 0,
+  #          size = 4))
 
-ggsave(file.path("figures","Co2_root_plot_bayesian.jpg"),plot_to_export,
+## old label: "Treatment: p < 0.001\nRoot biomass: p < 0.001\nRoot biomass:Extended season: P < 0.1"
+ggsave(file.path("figures","Co2_root_plot_bayesian2.jpg"),plot_to_export,
        width = 180, height = 160, unit = "mm",dpi = 350)
 
 
-# statistical reporting with the fit models
-new_data_co2
+

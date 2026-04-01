@@ -278,16 +278,16 @@ plot_gram2 <- ggplot(preds_delta_gram, aes(x = Estimate, fill = treatment)) +
               ggtitle("Graminoid") +
               theme_set(theme_classic()) +
               facet_wrap(~treatment, scales = "free_y", nrow = 3, strip.position = "right") +
-              geom_text(data = subset(preds_delta, treatment == "Heat wave"),
-                        aes(x = -0.025, y = 200, label = "55% chance root\nbiomass increases"),
-                        size = 4.5,
-                        hjust = 0,
-                        fontface = "plain") +
-              geom_text(data = subset(preds_delta, treatment == "Extended season"),
-                        aes(x = -0.025, y = 225, label = "48% chance root\nbiomass increases"),
-                        size = 4.5,
-                        hjust = 0,
-                        fontface = "plain") +
+              # geom_text(data = subset(preds_delta, treatment == "Heat wave"),
+              #           aes(x = -0.025, y = 200, label = "55% chance root\nbiomass increases"),
+              #           size = 4.5,
+              #           hjust = 0,
+              #           fontface = "plain") +
+              # geom_text(data = subset(preds_delta, treatment == "Extended season"),
+              #           aes(x = -0.025, y = 225, label = "48% chance root\nbiomass increases"),
+              #           size = 4.5,
+              #           hjust = 0,
+              #           fontface = "plain") +
               theme(legend.position = "none",
                     legend.title = element_blank(),
                     legend.text = element_text(size = 10),
@@ -305,21 +305,28 @@ plot_shrub1 <- plot_shrub1 + coord_cartesian(ylim = c(0, 0.1))
 plot_gram1 <- plot_gram1 + coord_cartesian(ylim = c(0, 0.1))
 
 
-(plot_shrub1 | plot_gram1) +
-  plot_layout(axis_titles = "collect") +
-  plot_annotation(tag_levels = "A") &
-  theme(legend.position = "none",
-        plot.tag = element_text(face = "bold", size = 20))
-
+figure_1 <- (plot_shrub1 | plot_gram1) +
+            plot_layout(axis_titles = "collect") +
+            plot_annotation(tag_levels = "A") &
+            theme(legend.position = "none",
+                  plot.tag = element_text(face = "bold", size = 20))
+figure_1
 
 plot_shrub2 <- plot_shrub2 + coord_cartesian(xlim = c(-0.1, 0.1))
 plot_gram2 <- plot_gram2 + coord_cartesian(xlim = c(-0.03, 0.03))
 
-(plot_shrub2 | plot_gram2) +
-  plot_layout(axis_titles = "collect") +
-  plot_annotation(tag_levels = "A") &
-  theme(legend.position = "none",
-        plot.tag = element_text(face = "bold", size = 20))
+figure_2 <- (plot_shrub2 | plot_gram2) +
+              plot_layout(axis_titles = "collect") +
+              plot_annotation(tag_levels = "A") &
+              theme(legend.position = "none",
+                    plot.tag = element_text(face = "bold", size = 20))
+figure_2
+
+ggsave(file.path("figures","figure_2.jpg"),figure_2,
+       width = 180, height = 160, unit = "mm",dpi = 350)
+
+ggsave(file.path("figures","figure_1.jpg"),figure_1,
+       width = 180, height = 160, unit = "mm",dpi = 350)
 
 
 
